@@ -1,0 +1,12 @@
+data msg BYTE "Hello, world!\n"
+
+entry:
+	move &R1, msg ; msg to write
+	move &R2, 1   ; 1 char = 1 byte
+	move &R3, 14  ; size of the message
+	move &R4, 1   ; stdout
+
+	syscall 0 ; writef syscall
+
+	move &EX, 0 ; exit with exitcode 0
+	halt

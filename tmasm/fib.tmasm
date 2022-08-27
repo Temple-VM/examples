@@ -1,0 +1,121 @@
+define STDOUT 1
+define WRITEF 0
+
+; print is from int_to_str.tmasm, but modified a bit to also print a new line
+print:
+define BUF_SIZE 32
+
+	; R1 = number to print
+
+	; new scope
+	push WORD &SB
+	move      &SB, &SP
+
+	add &SP, BUF_SIZE
+
+	move &R2, &SP
+	sub  &R2, BUF_SIZE
+	move &R3, 1
+
+	move       &R4, BUF_SIZE ; include a new line at the end
+	dec        &R4
+	add        &R4, &R2
+	write BYTE &R4, '\n'
+
+	print_loop1:
+		move       &R4, BUF_SIZE
+		sub        &R4, &R3
+		dec        &R4
+		add        &R4, &R2
+		move       &R5, &R1
+		mod        &R5, 10
+		add        &R5, '0'
+		write BYTE &R4, &R5
+
+		inc &R3
+		div &R1, 10
+
+		neq   &R1, 0
+		jumpt print_loop1
+
+	move &R1, &R2
+	add  &R1, BUF_SIZE
+	sub  &R1, &R3
+
+	move &R2, 1
+	move &R4, STDOUT
+
+	syscall WRITEF
+
+	; end the scope
+	move &SP, &SB
+
+	pop WORD &SB
+	ret
+
+strlen:
+	; R1 = address where the string is at
+	; AC = string lenght output
+
+	move &AC, 0
+
+	strlen_loop1:
+		read BYTE &R2, &R1
+		neq       &R2, 0
+		inc       &R1
+		inc       &AC
+		jumpt     strlen_loop1
+
+	ret
+
+entry:
+data title BYTE "Fibonacci sequence, 20 terms:\n"
+
+	move &R1, title
+	move &R2, 1
+
+	pusha
+	call strlen
+	popa
+
+	move &R3, &AC
+	move &R4, STDOUT
+
+	syscall WRITEF
+
+	move &R9, 20 ; max
+
+	move &R5, 0   ; term 1
+	move &R6, 1   ; term 2
+	move &R7, &R5 ; next term
+	add  &R7, &R6
+
+	move &R8, 0 ; iterator
+
+	move &R1, &R5
+	pusha
+	call print
+	popa
+
+	move &R1, &R6
+	pusha
+	call print
+	popa
+
+	loop1:
+		move &R1, &R7
+		pusha
+		call print
+		popa
+
+		move &R5, &R6
+		move &R6, &R7
+		move &R7, &R5
+		add  &R7, &R6
+
+		inc &R8
+		lt  &R8, &R9
+		jumpt loop1
+
+	move &EX, 0
+	halt

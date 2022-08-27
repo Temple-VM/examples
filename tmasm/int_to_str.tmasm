@@ -1,0 +1,64 @@
+define STDOUT 1
+define WRITEF 0
+
+print:
+define BUF_SIZE 32
+
+	; new scope
+	push WORD &SB
+	move      &SB, &SP
+
+	add &SP, BUF_SIZE
+
+	; p_num = R1
+
+	move &R2, &SP      ; char buf[32];
+	sub  &R2, BUF_SIZE
+	move &R3, 0        ; uint64_t buf_size = 0;
+
+	print_loop1:                  ; do {
+		move       &R4, BUF_SIZE  ;     buf[sizeof(buf) - buf_size - 1] = p_num % 10 + '0';
+		sub        &R4, &R3
+		dec        &R4
+		add        &R4, &R2
+		move       &R5, &R1
+		mod        &R5, 10
+		add        &R5, '0'
+		write BYTE &R4, &R5
+
+		inc &R3     ;     ++ buf_size;
+		div &R1, 10 ;     p_num /= 10;
+
+		neq   &R1, 0      ; } while (p_num);
+		jumpt print_loop1
+
+	move &R1, &R2      ; fwrite(buf[sizeof(buf) - buf_size], buf_size, 1, stdout);
+	add  &R1, BUF_SIZE
+	sub  &R1, &R3
+
+	move &R2, 1
+	move &R4, STDOUT
+
+	syscall WRITEF
+
+	; end the scope
+	move &SP, &SB
+
+	pop WORD &SB
+	ret
+
+entry:
+data new_line BYTE '\n'
+
+	move &R1, 1024
+	call print
+
+	move &R1, new_line
+	move &R2, 1
+	move &R3, 1
+	move &R4, STDOUT
+
+	syscall WRITEF
+
+	move &EX, 0
+	halt
