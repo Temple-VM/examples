@@ -36,8 +36,8 @@ define BUF_SIZE 32
 	add  &R1, BUF_SIZE
 	sub  &R1, &R3
 
-	move &R2, 1
-	move &R4, STDOUT
+	move &R2, &R3
+	move &R3, STDOUT
 
 	syscall WRITEF
 
@@ -55,8 +55,7 @@ data new_line BYTE '\n'
 
 	move &R1, new_line
 	move &R2, 1
-	move &R3, 1
-	move &R4, STDOUT
+	move &R3, STDOUT
 
 	syscall WRITEF
 

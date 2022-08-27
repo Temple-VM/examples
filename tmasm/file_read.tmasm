@@ -1,0 +1,81 @@
+; run file_write.tm first
+
+define STDOUT 1
+
+define WRITEF 0
+define READF  1
+define OPENF  5
+define CLOSEF 6
+
+define OPENF_ERR 255
+
+define FOR_READING 1
+
+strlen:
+	; R1 = address where the string is at
+	; AC = string length output
+
+	move &AC, 0
+
+	strlen_loop1:
+		read BYTE &R2, &R1
+		neq       &R2, 0
+		inc       &R1
+		inc       &AC
+		jumpt     strlen_loop1
+
+	ret
+
+entry:
+data file BYTE "out.txt"
+
+	move &R1, file
+	move &R2, FOR_READING
+
+	syscall OPENF
+
+	eq &AC, OPENF_ERR ; did openf fail?
+	jumpf skip
+
+data err BYTE "Failed to open out.txt\n"
+
+	move &R1, err
+
+	pusha
+	call strlen
+	popa
+
+	move &R2, &AC
+	move &R3, STDOUT
+
+	syscall WRITEF
+
+	move &EX, 1
+	halt
+
+skip:
+
+	move &R4, &AC ; save the file descriptor
+
+define READ_LEN 14 ; the file should contain "Hello, world!\n", which has 14 character
+
+	add  &SP, READ_LEN ; create a buffer to read into
+	move &R1, &SP
+	move &R2, READ_LEN
+	move &R3, &R4
+
+	syscall READF
+
+	move &R1, &SP
+	move &R2, 14
+	move &R3, STDOUT
+
+	syscall WRITEF
+
+	move &R1, &R4
+
+	syscall CLOSEF
+
+	move &EX, 0
+	halt
+

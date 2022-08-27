@@ -10,6 +10,7 @@ $(BIN): ./%.tm : ./%.tmasm
 
 clean:
 	rm -r ./*.tm
+	rm -r ./*.txt
 
 all:
 	@echo compile, clean

@@ -42,8 +42,8 @@ define BUF_SIZE 32
 	add  &R1, BUF_SIZE
 	sub  &R1, &R3
 
-	move &R2, 1
-	move &R4, STDOUT
+	move &R2, &R3
+	move &R3, STDOUT
 
 	syscall WRITEF
 
@@ -55,7 +55,7 @@ define BUF_SIZE 32
 
 strlen:
 	; R1 = address where the string is at
-	; AC = string lenght output
+	; AC = string length output
 
 	move &AC, 0
 
@@ -72,14 +72,13 @@ entry:
 data title BYTE "Fibonacci sequence, 20 terms:\n"
 
 	move &R1, title
-	move &R2, 1
 
 	pusha
 	call strlen
 	popa
 
-	move &R3, &AC
-	move &R4, STDOUT
+	move &R2, &AC
+	move &R3, STDOUT
 
 	syscall WRITEF
 

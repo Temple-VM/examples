@@ -1,0 +1,51 @@
+define WRITEF 0
+define OPENF  5
+define CLOSEF 6
+
+define FOR_WRITING 0
+
+strlen:
+	; R1 = address where the string is at
+	; AC = string length output
+
+	move &AC, 0
+
+	strlen_loop1:
+		read BYTE &R2, &R1
+		neq       &R2, 0
+		inc       &R1
+		inc       &AC
+		jumpt     strlen_loop1
+
+	ret
+
+entry:
+data file BYTE "out.txt"
+
+	move &R1, file
+	move &R2, FOR_WRITING
+
+	syscall OPENF
+
+	move &R4, &AC ; save the file descriptor
+
+data msg BYTE "Hello, world!\n"
+
+	move &R1, msg
+
+	pusha
+	call strlen
+	popa
+
+	move &R2, &AC
+	move &R3, &R4
+
+	syscall WRITEF
+
+	move &R1, &R4
+
+	syscall CLOSEF
+
+	move &EX, 0
+	halt
+
