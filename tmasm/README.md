@@ -17,5 +17,4 @@ $ make
 ```
 
 ## Dependencies
-- A unix system
 - TMASM installed
